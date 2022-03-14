@@ -108,15 +108,15 @@ class MavDynamics:
         down_dot = pos_dot[2]
 
         # position dynamics
-        u_dot = 
-        v_dot = 
-        w_dot = 
+        u_dot = r * v - q * w + fx / MAV.mass
+        v_dot = p * w - r * u + fy / MAV.mass
+        w_dot = q * u - p * v + fz / MAV.mass
 
         # rotational kinematics
-        e0_dot = 
-        e1_dot = 
-        e2_dot = 
-        e3_dot = 
+        e0_dot = 0.5 * (-p*e1 - q*e2 - r*e3)
+        e1_dot = 0.5 * (p*e0 + r*e2 - q*e3)
+        e2_dot = 0.5 * (q*e0 - r*e1 + p*e3)
+        e3_dot = 0.5 * (r*e0 + q*e1 - p*e2)
 
         # rotatonal dynamics
         p_dot = 
