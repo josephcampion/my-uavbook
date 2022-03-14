@@ -91,9 +91,22 @@ class DrawMav:
 
         # points are in NED coordinates
         # define the points on the aircraft following diagram Fig 2.14
-        points = np.array([[0, 0, 0],  # point 1 [0]
-                           [1, 1, 1],  # point 2 [1]
-                           [1, 1, 0],  # point 3 [2]
+        points = np.array([[fuse_l1, 0., 0.],  # point 1 [0]
+                           [fuse_l2, fuse_w/2, -fuse_h/2],  # point 2 [1]
+                           [fuse_l2, -fuse_w/2, -fuse_h/2],  # point 3 [2]
+                           [fuse_l2, -fuse_w/2, fuse_h/2],  # point 4 [3]
+                           [fuse_l2, fuse_w/2, fuse_h/2],  # point 5 [4]
+                           [-fuse_l3, 0., 0.],  # point 6 [5]
+                           [0., wing_w/2, 0.],  # point 7 [6]
+                           [-wing_l, wing_w/2, 0.],  # point 8 [7]
+                           [-wing_l, -wing_w/2, 0.],  # point 9 [8]
+                           [0., -wing_w/2, 0.],  # point 10 [9]
+                           [-fuse_l3 + tail_l, tail_w/2, 0.],  # point 11 [10]
+                           [-fuse_l3, tail_w/2, 0.],  # point 12 [11]
+                           [-fuse_l3, -tail_w/2, 0.],  # point 13 [12]
+                           [-fuse_l3 + tail_l, -tail_w/2, 0.],  # point 14 [13]
+                           [-fuse_l3 + tail_l, 0., 0.],  # point 15 [14]
+                           [-fuse_l3, 0., -tail_h],  # point 16 [15]
                            ]).T
 
         # scale points for better rendering
@@ -107,6 +120,18 @@ class DrawMav:
         yellow = np.array([1., 1., 0., 1])
         meshColors = np.empty((13, 3, 4), dtype=np.float32)
         meshColors[0] = yellow
+        meshColors[1] = yellow
+        meshColors[2] = yellow
+        meshColors[3] = yellow
+        meshColors[4] = red
+        meshColors[5] = red
+        meshColors[6] = red
+        meshColors[7] = red
+        meshColors[8] = blue
+        meshColors[9] = blue
+        meshColors[10] = green
+        meshColors[11] = green
+        meshColors[12] = green
 
         return points, meshColors
 
@@ -117,6 +142,20 @@ class DrawMav:
           (a rectangle requires two triangular mesh faces)
         """
         points = points.T
-        mesh = np.array([[points[0], points[1], points[2]]])
+        mesh = np.array([
+            [points[0], points[1], points[2]],      # nose
+            [points[0], points[2], points[3]],      # nose
+            [points[0], points[3], points[4]],      # nose
+            [points[0], points[4], points[1]],      # nose
+            [points[5], points[1], points[2]],      # fuselage
+            [points[5], points[2], points[3]],      # fuselage
+            [points[5], points[3], points[4]],      # fuselage
+            [points[5], points[4], points[1]],      # fuselage
+            [points[6], points[7], points[8]],      # wing
+            [points[6], points[8], points[9]],      # wing
+            [points[10], points[11], points[12]],   # tailwing
+            [points[10], points[12], points[13]],   # tailwing
+            [points[5], points[14], points[15]],    # tailwing
+            ])
 
         return mesh
