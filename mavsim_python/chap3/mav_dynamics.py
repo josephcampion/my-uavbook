@@ -102,7 +102,7 @@ class MavDynamics:
         n = forces_moments.item(5)
 
         # position kinematics
-        pos_dot = Quaternion2Rotation([e0, e1, e2, e3]) @ np.array([u, v, w])
+        pos_dot = Quaternion2Rotation(np.array([e0, e1, e2, e3])) @ np.array([u, v, w])
         north_dot = pos_dot[0]
         east_dot = pos_dot[1]
         down_dot = pos_dot[2]
