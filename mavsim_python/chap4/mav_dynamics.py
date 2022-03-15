@@ -9,6 +9,8 @@ part of mavPySim
         12/20/2018 - RWB
 """
 import sys
+
+from mavsim_python.parameters.aerosonde_parameters import C_ell_0, C_ell_beta, C_ell_p
 sys.path.append('..')
 import numpy as np
 
@@ -211,10 +213,23 @@ class MavDynamics:
             MAV.C_Y_delta_r * delta.rudder)
 
         # compute logitudinal torque in body frame
-        My = 
+        My = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.c * (MAV.C_D_0 + \
+            MAV.C_D_alpha * self._alpha + \
+            MAV.C_D_q * MAV.c / (2*self._Va) * q + \
+            MAV.C_D_delta_e * delta.elevator)
         # compute lateral torques in body frame
-        Mx = 
-        Mz = 
+        Mx = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_ell_0 + \
+            MAV.C_ell_beta * self._beta + \
+            MAV.C_ell_p * MAV.b * (2*self._Va) * p + \
+            MAV.C_ell_r * MAV.b * (2*self._Va) * r + \
+            MAV.C_ell_delta_a * delta.aileron + \
+            MAV.C_ell_delta_r * delta.rudder)
+        Mz = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_n_0 + \
+            MAV.C_n_beta * self._beta + \
+            MAV.C_n_p * MAV.b * (2*self._Va) * p + \
+            MAV.C_n_r * MAV.b * (2*self._Va) * r + \
+            MAV.C_n_delta_a * delta.aileron + \
+            MAV.C_n_delta_r * delta.rudder)
 
         self._forces[0] = fx
         self._forces[1] = fy
