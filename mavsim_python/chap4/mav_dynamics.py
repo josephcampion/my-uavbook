@@ -9,8 +9,6 @@ part of mavPySim
         12/20/2018 - RWB
 """
 import sys
-
-from mavsim_python.parameters.aerosonde_parameters import C_ell_0, C_ell_beta, C_ell_p
 sys.path.append('..')
 import numpy as np
 
@@ -153,24 +151,27 @@ class MavDynamics:
         steady_state = wind[0:3]
         gust = wind[3:6]
         # convert wind vector from world to body frame and add gust
-        wind_body_frame =
+        # wind_body_frame = R_veh_to_body @ wind + gust
         # velocity vector relative to the airmass
-        v_air = 
-        ur = 
-        vr = 
-        wr = 
+        u = self._state.item(3)
+        v = self._state.item(4)
+        w = self._state.item(5)
+        # v_air = [u,v,w] - wind_body_frame
+        ur = u # - uw
+        vr = v # - vw
+        wr = w # - ww
         # compute airspeed
-        self._Va = 
+        self._Va = np.sqrt(ur**2 + vr**2 + wr**2)
         # compute angle of attack
         if ur == 0:
-            self._alpha = 
+            self._alpha = 0.
         else:
-            self._alpha = 
+            self._alpha = np.arctan2(wr, ur)
         # compute sideslip angle
         if self._Va == 0:
-            self._beta = 
+            self._beta = 0.
         else:
-            self._beta = 
+            self._beta = np.arcsin(vr / self._Va)
 
     def _forces_moments(self, delta):
         """
@@ -198,7 +199,7 @@ class MavDynamics:
             MAV.C_D_delta_e * delta.elevator)
 
         #compute propeller thrust and torque
-        thrust_prop, torque_prop = #self._motor_thrust_torque()
+        thrust_prop, torque_prop = self._motor_thrust_torque(self._Va, delta.throttle)
 
         # compute longitudinal forces in body frame
         fx = np.cos(self._alpha)*(-F_drag) - np.sin(self._alpha)*(-F_lift)
