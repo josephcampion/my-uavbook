@@ -239,14 +239,20 @@ class MavDynamics:
     def _motor_thrust_torque(self, Va, delta_t):
         # compute thrust and torque due to propeller  (See addendum by McLain)
         # map delta_t throttle command(0 to 1) into motor input voltage
-        V_in = 
+        V_in = MAV.V_max * delta_t
 
         # Angular speed of propeller
-        Omega_p = 
+        a = MAV.rho * MAV.D_prop**5 / (2*np.pi)**2 * MAV.C_Q0
+        b = MAV.rho * MAV.D_prop**4 / (2*np.pi) * MAV.C_Q1 * Va + MAV.KQ * MAV.KV / MAV.R_motor
+        c = MAV.rho * MAV.D_prop**3 * MAV.C_Q2 * Va**2 - MAV.KQ / MAV.R_motor * V_in + MAV.KQ * MAV.i0
+        Omega_p = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
 
         # thrust and torque due to propeller
-        thrust_prop = 
-        torque_prop =  
+        J = 2*np.pi * Va / (Omega_p * MAV.D_prop)
+        C_TJ = MAV.C_T2 * J**2 + MAV.C_T1 * J + MAV.C_T0
+        C_QJ = MAV.C_Q2 * J**2 + MAV.C_Q1 * J + MAV.C_Q0
+        thrust_prop = MAV.rho * MAV.D_prop**4 / (4*np.pi**2) * Omega_p**2 * C_TJ
+        torque_prop = MAV.rho * MAV.D_prop**5 / (4*np.pi**2) * Omega_p**2 * C_QJ
         return thrust_prop, torque_prop
 
     def _update_true_state(self):
