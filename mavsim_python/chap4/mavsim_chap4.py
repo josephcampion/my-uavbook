@@ -13,7 +13,7 @@ import parameters.simulation_parameters as SIM
 from chap2.mav_viewer import MavViewer
 from chap3.data_viewer import DataViewer
 from chap4.mav_dynamics import MavDynamics
-# from chap4.wind_simulation import WindSimulation
+from chap4.wind_simulation import WindSimulation
 from message_types.msg_delta import MsgDelta
 
 # initialize the visualization
@@ -27,7 +27,7 @@ if VIDEO is True:
                         output_rate=SIM.ts_video)
 
 # initialize elements of the architecture
-# wind = WindSimulation(SIM.ts_simulation)
+wind = WindSimulation(SIM.ts_simulation)
 mav = MavDynamics(SIM.ts_simulation)
 delta = MsgDelta()
 
@@ -45,7 +45,7 @@ while sim_time < SIM.end_time:
     delta.throttle = 0.6768
 
     # -------physical system-------------
-    current_wind = np.zeros((6,1)) # wind.update()  # get the new wind vector
+    current_wind = wind.update()  # get the new wind vector
     mav.update(delta, current_wind)  # propagate the MAV dynamics
 
     # -------update viewer-------------
