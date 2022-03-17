@@ -185,7 +185,7 @@ class MavDynamics:
         r = self._state.item(12)
 
         # compute gravitaional forces
-        f_g = -MAV.mass * MAV.gravity * np.sin(theta)
+        f_g = MAV.mass * MAV.gravity
 
         # compute Lift and Drag coefficients
         CL = MAV.C_L_0 + MAV.C_L_alpha * self._alpha
@@ -202,11 +202,15 @@ class MavDynamics:
         thrust_prop, torque_prop = self._motor_thrust_torque(self._Va, delta.throttle)
 
         # compute longitudinal forces in body frame
-        fx = np.cos(self._alpha)*(-F_drag) - np.sin(self._alpha)*(-F_lift)
-        fz = np.sin(self._alpha)*(-F_drag) + np.cos(self._alpha)*(-F_lift)
+        fx = -f_g * np.sin(theta) + \
+            np.cos(self._alpha)*(-F_drag) - np.sin(self._alpha)*(-F_lift) + \
+            thrust_prop
+        fz = f_g * np.cos(theta) * np.cos(phi) + \
+            np.sin(self._alpha)*(-F_drag) + np.cos(self._alpha)*(-F_lift)
 
         # compute lateral forces in body frame
-        fy = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * (MAV.C_Y_0 + \
+        fy = f_g * np.cos(theta) * np.sin(phi) + \
+            0.5 * MAV.rho * self._Va**2 * MAV.S_wing * (MAV.C_Y_0 + \
             MAV.C_Y_beta * self._beta + \
             MAV.C_Y_p * MAV.b / (2*self._Va) * p + \
             MAV.C_Y_r * MAV.b / (2*self._Va) * r + \
@@ -214,21 +218,22 @@ class MavDynamics:
             MAV.C_Y_delta_r * delta.rudder)
 
         # compute logitudinal torque in body frame
-        My = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.c * (MAV.C_D_0 + \
-            MAV.C_D_alpha * self._alpha + \
-            MAV.C_D_q * MAV.c / (2*self._Va) * q + \
-            MAV.C_D_delta_e * delta.elevator)
+        My = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.c * (MAV.C_m_0 + \
+            MAV.C_m_alpha * self._alpha + \
+            MAV.C_m_q * MAV.c / (2*self._Va) * q + \
+            MAV.C_m_delta_e * delta.elevator)
         # compute lateral torques in body frame
-        Mx = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_ell_0 + \
+        Mx = torque_prop + \
+            0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_ell_0 + \
             MAV.C_ell_beta * self._beta + \
-            MAV.C_ell_p * MAV.b * (2*self._Va) * p + \
-            MAV.C_ell_r * MAV.b * (2*self._Va) * r + \
+            MAV.C_ell_p * MAV.b / (2*self._Va) * p + \
+            MAV.C_ell_r * MAV.b / (2*self._Va) * r + \
             MAV.C_ell_delta_a * delta.aileron + \
             MAV.C_ell_delta_r * delta.rudder)
         Mz = 0.5 * MAV.rho * self._Va**2 * MAV.S_wing * MAV.b * (MAV.C_n_0 + \
             MAV.C_n_beta * self._beta + \
-            MAV.C_n_p * MAV.b * (2*self._Va) * p + \
-            MAV.C_n_r * MAV.b * (2*self._Va) * r + \
+            MAV.C_n_p * MAV.b / (2*self._Va) * p + \
+            MAV.C_n_r * MAV.b / (2*self._Va) * r + \
             MAV.C_n_delta_a * delta.aileron + \
             MAV.C_n_delta_r * delta.rudder)
 
@@ -246,7 +251,7 @@ class MavDynamics:
         a = MAV.rho * MAV.D_prop**5 / (2*np.pi)**2 * MAV.C_Q0
         b = MAV.rho * MAV.D_prop**4 / (2*np.pi) * MAV.C_Q1 * Va + MAV.KQ * MAV.KV / MAV.R_motor
         c = MAV.rho * MAV.D_prop**3 * MAV.C_Q2 * Va**2 - MAV.KQ / MAV.R_motor * V_in + MAV.KQ * MAV.i0
-        Omega_p = (-b + np.sqrt(b**2 - 4*a*c))/(2*a)
+        Omega_p = (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
 
         # thrust and torque due to propeller
         J = 2*np.pi * Va / (Omega_p * MAV.D_prop)
