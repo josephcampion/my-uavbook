@@ -151,15 +151,19 @@ class MavDynamics:
         steady_state = wind[0:3]
         gust = wind[3:6]
         # convert wind vector from world to body frame and add gust
-        # wind_body_frame = R_veh_to_body @ wind + gust
+        e0 = self._state.item(6)
+        e1 = self._state.item(7)
+        e2 = self._state.item(8)
+        e3 = self._state.item(9)
+        wind_body_frame = Quaternion2Rotation(np.array([e0, e1, e2, e3])).T @ steady_state + gust
         # velocity vector relative to the airmass
         u = self._state.item(3)
         v = self._state.item(4)
         w = self._state.item(5)
         # v_air = [u,v,w] - wind_body_frame
-        ur = u # - uw
-        vr = v # - vw
-        wr = w # - ww
+        ur = u - wind_body_frame[0][0]
+        vr = v - wind_body_frame[1][0]
+        wr = w - wind_body_frame[2][0]
         # compute airspeed
         self._Va = np.sqrt(ur**2 + vr**2 + wr**2)
         # compute angle of attack
