@@ -263,7 +263,7 @@ class MavDynamics:
         C_QJ = MAV.C_Q2 * J**2 + MAV.C_Q1 * J + MAV.C_Q0
         thrust_prop = MAV.rho * MAV.D_prop**4 / (4*np.pi**2) * Omega_p**2 * C_TJ
         torque_prop = MAV.rho * MAV.D_prop**5 / (4*np.pi**2) * Omega_p**2 * C_QJ
-        return thrust_prop, 0. #torque_prop
+        return thrust_prop, torque_prop
 
     def _update_true_state(self):
         # update the class structure for the true state:
